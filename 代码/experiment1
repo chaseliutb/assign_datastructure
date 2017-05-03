@@ -1,0 +1,80 @@
+#include <stdio.h>
+#include <malloc.h>
+typedef int datatype;   
+typedef struct node {  	
+	datatype   data;     	
+	struct node *next;  	
+}linknode, *link;
+link CreateList()              //创建链表
+{ 
+    int a; link H, p, r;
+    H = (link)malloc(sizeof(linknode));   		
+    r = H;  scanf("%d", &a); 			
+    while (a != -1) {                         //输入-1即认为停止输入
+        p = (link)malloc(sizeof(linknode));	
+        p->data = a; r->next = p;  r = p;     		
+        scanf("%d", &a);
+    } 
+    r->next = NULL;				 
+    return H; 
+} 
+int lisklength(link H)
+{
+	int i=0;
+	link q=H->next;
+	while(q!=NULL)
+	{
+		q=q->next;
+		i++;
+	}
+	return i;
+}
+void adjmax(link H,int k,int length)
+{
+	link p,q;
+	p=H->next;
+	int sum,max,maxp,i,imax,k1;
+	max=0;i=1;
+	if((p==NULL)||(k>length))
+	   printf("ERROR\n");
+	else
+	{
+		while(p)
+		{
+		    k1=k;
+			sum=0;
+		    q=p;
+            while((k1--)&&(q))
+            {
+                sum += q->data;
+                q = q->next;
+            }
+            if(sum>max)
+            {
+        	   max=sum;
+        	   maxp=p->data;
+        	   imax=i;
+            }
+            p=p->next;
+            i++;
+		}
+	    printf("相邻%d个最大值为%d,初始结点序列号为%d,data值为%d\n",k,max,imax,maxp);
+    }   
+}
+void main()
+{
+	int length,k;
+	link A;	
+	A=CreateList();
+	length=lisklength(A);
+	while(k)
+	{
+			printf("please input k:\n");
+		    scanf("%d",&k);
+		    if(k==0)
+		    break;
+		    else
+		    adjmax(A,k,length);
+	}
+	printf("结束\n");
+}

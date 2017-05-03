@@ -1,0 +1,131 @@
+#include<stdio.h>
+#include<malloc.h>
+#include<string.h>
+#include <stdlib.h>
+#define  MAXSIZE 64           //栈最大容量
+#define  MAX 100              //结点最大容量
+typedef char vtype;
+typedef int datatype;
+typedef  struct {
+	    datatype  data[MAXSIZE];   //栈的存储空间
+  	    int top;                      //栈顶指针（或游标）
+} sqstack,*sqslink;       //顺序栈说明符
+typedef struct Anode {   //弧节点
+    int tail, head;
+    struct Anode *hlink,*tlink;
+}arcnode;
+typedef struct Vnode { //顶点
+    vtype data;
+    arcnode *fin,*fout;
+}vexnode;
+vexnode G[MAX]; //顶点表
+int n=0;           //结点数 
+void ClearStack (sqslink s)    //置栈空
+      {   s->top = -1; }
+int EmptyStack (sqslink s)    //判断栈空
+      {
+          if(s->top < 0)return 1;   //栈空返回1
+          else return 0 ;                     //栈非空返回0
+      }
+void Push(sqslink s, datatype x)   //x进栈
+      { 
+          s->top++;  s->data[s->top] = x;                //x进栈
+      }
+int Pop(sqslink s)   //数据出栈
+     { 
+		 return s->data[s->top];
+     }
+void pop(sqslink s)    //top指针-1 
+{
+	s->top--;
+} 
+int locatevex(vexnode G[],vtype v)
+{
+	int i=0;
+	while(G[i].data!=v)
+	{
+		i++;
+	}
+	return i;
+}
+void createorlist(vexnode G[])    //建立有向图十字链表的算法，返回结点个数
+{  int i,j;  
+    arcnode *p;  
+    vtype ch,u,v;  
+    i=0;j=0;
+    ch=getchar();   //读入顶点
+    while(ch!='#')  //ch不等于结束符时
+    {  n++;
+        G[i].data=ch;              //顶点计数、存入顶点
+        G[i].fin=G[i].fout=NULL;   //初始化顶点表
+        i++;  
+        ch=getchar();
+    }
+    fflush(stdin);
+	scanf("%c,%c",&u,&v);    //∥读入弧<u,v>
+  while(u!='#'&&v!='#')
+  {  i=locatevex(G,u);    //∥求顶点u、v的序号    
+     j=locatevex(G,v);
+     p=(arcnode *)malloc(sizeof(arcnode));    //∥申请弧节点
+     p->tail=i;  p->head=j;
+     p->tlink=G[i].fout; 
+     G[i].fout=p;
+     p->hlink=G[j].fin;   
+     G[j].fin=p ;
+     fflush(stdin);
+     scanf("%c,%c",&u,&v); 
+  }
+}  
+void Creatid (vexnode G[ ], int n,int id[ ])                     //∥建立顶点的入度表id，顶点数=n
+{ 	int count,i;  arcnode *p;
+    for (i=0;i<n;i++)                                      // ∥求n个顶点的入度
+     { id[i]= 0; count=0;                                //∥入度值计数
+        p=G[i].fin;                                    //∥取以vi为弧头的第一弧节点
+        while (p)  
+		{ count++;   p=p->hlink; }             //∥取以vi为弧头的下一弧节点
+        id[i]=count;
+	}
+}    //∥入度赋值
+void Topsort (vexnode G[ ], int n)                         //∥对网G拓扑排序的算法
+{  int ii,jj,k,count,id[n-1];  arcnode *p; sqslink s;
+    s = (sqslink)malloc(sizeof(sqstack));
+    Creatid (G,n,id);                                         //∥建立G的入度表id
+    ClearStack (s);                                           // ∥置栈空∥
+    for (ii=0;ii<n;ii++)    
+		if (id[ii]==0) 
+		   Push (s,ii);             //∥入度为0的顶点序号进栈
+    count=0;                                                   //∥输出顶点计数
+	while (!EmptyStack (s))                      //∥栈非空时
+	{   
+		jj=Pop (s); 
+		pop(s);                             //∥退栈，栈顶赋给j
+    	count++; 
+		p=G[jj].fout;              //取vj发出的第一条弧
+	    while (p)
+	    {    k=p->head;                      //∥取vj之后继vk
+	         id[k]--;                        // ∥vk的入度减1
+	         if (id[k]==0)   Push (s,k);    //∥入度为0的顶点序号进栈
+	         p=p->tlink;                      //∥取vj的下一后继∥
+	    }  
+	}
+	if (count==n)    
+		printf("This graph has not cycle.\n");
+	else    
+		printf("This graph has cycle.\n");   
+}
+//主函数 
+void main()
+{
+	int ss=1;
+	printf("start!\n");
+	while(ss)
+	{
+	createorlist(G);
+	Topsort(G,n);
+	printf("continue?(1/0):");
+	scanf("%d",&ss);
+	}
+	printf("end\n");
+}
+
+

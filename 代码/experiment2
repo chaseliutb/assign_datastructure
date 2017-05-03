@@ -1,0 +1,177 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <malloc.h>
+#include <math.h>
+#define  MAXSIZE 100              //栈最大容量
+typedef char datatype; 
+typedef  struct {
+	    datatype  data[MAXSIZE];   //栈的存储空间
+  	    int top;                      //栈顶指针（或游标）
+	} sqstack,*sqslink; 	//顺序栈说明符
+typedef  struct {                     //浮点型栈
+	    double  data[MAXSIZE];   
+  	    int top;                      
+	} dsqstack,*dsqslink; 	
+void ClearStack (sqslink s)    //置栈空
+      {   s->top = -1; }
+int EmptyStack (sqslink s)    //判断栈空
+      {
+          if(s->top < 0) return 1;   
+          else return 0 ;                    
+      }
+void Push(sqslink s, datatype x)   //x进栈
+      { 
+          //if (s->top >= MAXSIZE - 1)  return NULL;   //栈满溢出
+          s->top++;  s->data[s->top] = x;                //x进栈 
+      }
+char Pop(sqslink s)   //出栈
+     { 
+         //if (EmptyStack(s))  return NULL;   
+         return s->data[s->top]; 
+     } 
+void Pops(sqslink s)   //弹出元素不输出
+     { 
+         //if (EmptyStack(s))  return NULL;
+         s->top--; 
+     } 
+//***********浮点型栈***************************************//
+void dPush(dsqslink s, double x)   
+      { 
+          //if (s->top >= MAXSIZE - 1)  return NULL;   
+          s->top++;  s->data[s->top] = x;                
+      }
+double dPop(dsqslink s)   
+     { 
+         //if (dEmptyStack(s))  return NULL;   
+         return s->data[s->top]; 
+     } 
+void dPops(dsqslink s)   
+     { 
+         //if (dEmptyStack(s))  return NULL;
+         s->top--; 
+     }
+int dEmptyStack (dsqslink s)    
+      {
+          if(s->top < 0) return 1;   
+          else return 0 ;                    
+      }	 
+void dClearStack (dsqslink s)    
+      {   s->top = -1; }
+//**************************************************//
+int In(char e)
+{
+	if(e=='(' || e==')' || e=='+' || e=='-' || e=='*' || e=='/') return 1;
+	else return 0;
+}
+int cmp(char c)      //设置优先级                                          
+{
+	switch(c)
+	{
+		case '+':
+		case '-': return 1;
+		case '*':
+		case '/': return 2;
+		default : return 0;	
+	}	
+}
+double calculate(char op,double k1,double k2)                  //计算算式值
+{
+	double k;
+	switch (op)
+	{
+		case '+': k = k1+k2; break;
+		case '-': k = k1-k2; break;
+		case '*': k = k1*k2; break;
+		case '/': k = k1/k2; break;
+	}
+	return k;
+}
+void change(char str[])                                             
+{
+	int t,i,k,m;
+	char e,buf[100],op,s[100];              //buf存放单个操作数（多位数，小数）s存放后缀表达式
+	double kk,k1,k2;
+	sqslink S1;             //存放算术符
+	dsqslink S2;             //存放操作数
+	S1 = (sqslink)malloc(sizeof(sqstack));
+    S2 = (dsqslink)malloc(sizeof(dsqstack));
+	ClearStack (S1);
+	dClearStack (S2);
+	Push(S1,'=');
+	k=0;      
+	for(i=0;i<strlen(str);i++) //最后一位是 = 
+	{
+			if( In(str[i])  )
+			{				
+				switch(str[i])
+				{
+					case '(': Push(S1,str[i]); break;
+					case ')'://遇到右括号
+						while(Pop(S1)!='(')//弹出栈元素输出 直到“（”
+						{
+							s[k++]=Pop(S1);
+							k1 = dPop(S2); dPops(S2);
+							k2 = dPop(S2); dPops(S2);
+							dPush(S2,calculate(Pop(S1),k2,k1));
+							Pops(S1);
+						}
+						if(Pop(S1)=='(')//弹出（不输出
+						{
+							Pops(S1);	
+						} 
+						break;
+					default :
+						while(cmp(str[i])<=cmp(Pop(S1)))
+						{
+							s[k++]=Pop(S1);
+							k1 = dPop(S2); dPops(S2);
+							k2 = dPop(S2); dPops(S2);
+							dPush(S2,calculate(Pop(S1),k2,k1));	
+							Pops(S1);
+						}
+						Push(S1,str[i]);
+						break;
+				}//switch
+			}//if
+			else{
+				sscanf(str+i,"%[^=()+*/-]",buf); //操作数 
+				for(m=0;m<strlen(buf);m++) s[k++]=buf[m];
+				//printf("%s",buf);
+				i += strlen(buf)-1;
+				kk = atof(buf);                     //转浮点数
+				//printf("k = %lf\n",k);
+				//S2.push(kk);
+				dPush(S2,kk);
+			}			
+		}//for
+		while(EmptyStack(S1)==0)
+		{
+			if(Pop(S1)!='(' && Pop(S1)!='=')
+			{
+				s[k++]=Pop(S1);
+				k1 = dPop(S2); dPops(S2);
+			    k2 = dPop(S2); dPops(S2);
+				dPush(S2,calculate(Pop(S1),k2,k1));
+			}				
+			Pops(S1);
+		}
+		for(i=0;i<k;i++) printf("%c",s[i]);
+		printf("=\n");
+		printf("%.2lf\n",dPop(S2));		
+} 
+void main()
+{
+	int t,i;
+	char e,str[100],buf[100],op;
+	double k,k1,k2;
+    printf("start?\n");	
+	scanf("%d",&t); getchar();
+	while(t)
+	{		
+		gets(str); 
+		change(str);
+	    printf("continue?");
+	    scanf("%d",&t); getchar();
+	}
+}

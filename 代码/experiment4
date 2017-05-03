@@ -1,0 +1,96 @@
+#include "stdio.h"
+#include "stdlib.h"
+#include "string.h"
+#define N 2
+typedef struct node
+{
+	char data[15];
+	struct node *L,*R;
+}snode,*slink;
+typedef struct nodestack
+{
+	slink data[N];
+	int top;
+}sqstack,*sqslink;
+slink CreateTree(char sent[N][15])
+{
+	slink H,U,Q,G;
+	int i,a;
+	H=(slink)malloc(sizeof(snode));
+	strcpy(H->data,sent[0]);
+	H->L=H->R=NULL;
+	U=H;
+	for (i=1;i<N;i++)
+	{	
+		while (U)
+		{	
+			Q=U;
+			if(strcmp(U->data,sent[i])==0)
+			{	a=1;break;	}
+			else if (strcmp(U->data,sent[i])<0)
+			    U=U->R;
+			else U=U->L;
+		}
+		if (a!=1)
+		{
+			G=(slink)malloc(sizeof(snode));
+			strcpy(G->data,sent[i]);
+			G->L=G->R=NULL;
+			if (strcmp(Q->data,G->data)<0)
+				Q->R=G;
+			else Q->L=G;
+		}
+	}
+	return H;
+}
+void LDR(slink H)
+{
+	slink p;
+	sqslink S;
+	S=(sqslink)malloc(sizeof(sqstack));
+	S->top=-1;
+	Push(S,H);
+	while (!Emptystack(S))
+	{
+		while ((p=Getstop(S))&&p)
+			Push(S,p->L);
+		p=Pop(S);
+		if (!Emptystack(S))
+		{
+			p=Pop(S);
+			printf ("%s\t",p->data);
+			Push(S,p->R);
+		}
+	}
+}
+void Push(sqslink S,slink H)
+{
+	S->top++;
+	S->data[S->top]=H;
+}
+int Emptystack(sqslink S)
+{
+	if (S->top<0)
+		return 1;
+	else return 0;
+}
+slink Getstop(sqslink S)
+{
+	return S->data[S->top];
+}
+slink Pop(sqslink S)
+{
+	S->top--;
+	return S->data[S->top+1];
+}
+void main()
+{
+	slink H;
+	char sent[N][15];
+	int i=0;
+	while (i<N)
+		gets(sent[i++]);
+	H=CreateTree(sent);
+	LDR(H);							
+	printf("\nend output\n");
+}

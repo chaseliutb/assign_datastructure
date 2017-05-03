@@ -1,0 +1,70 @@
+#include <stdio.h>
+#include <malloc.h>
+#define  MAXSIZE 100  //队列最大容量
+typedef char datatype;
+typedef struct {
+        datatype data[MAXSIZE]; //队列的存储空间
+        int front, rear;        //队头、队尾指针
+} squeue, *squlink;
+void ClearQueue(squlink Q)   //置队空
+{ 
+     Q->front = Q->rear = 0;
+}
+int EmptyQueue(squlink Q)  //判断队空
+{ 
+    return (Q->front == Q->rear);
+}
+void EnQueue(squlink Q, datatype e)   //元素e进队
+    { 
+        if  ((Q->rear + 1) % MAXSIZE == Q->front) 
+            printf("ERROR\n"); //队满
+        Q->rear = (Q->rear + 1) % MAXSIZE;
+        Q->data[Q->rear] = e; 
+    }
+void DeQueue (squlink Q)  //出队 
+    { 
+        if ( EmptyQueue(Q))  
+			printf("ERROR\n");    //队空
+        Q->front = (Q->front + 1 ) % MAXSIZE;
+		printf("%c\n",Q->data[Q->front]);
+    }
+void main()
+{
+	int i=1;
+	int ch;
+	squlink queue;
+	queue = (squlink)malloc(sizeof(squeue));
+	ClearQueue(queue);
+	char str;
+	while(i&&ch)
+   {
+    fflush(stdin);                         //清空输入缓存区（回车） 
+	printf("input the word:");
+	scanf("%c",&str);
+	if(str!='\n'&&str!=' ')
+	{
+	   switch(str)
+	   { 
+		case '0':DeQueue(queue);  break;
+		case '@':
+		while(EmptyQueue(queue)==0)
+		{
+			DeQueue(queue);
+		}
+		break;
+		default:
+		{
+			EnQueue(queue,str);
+			printf("enter!\n");
+		}
+		break;
+	   }
+	}
+	else continue;
+    printf("continue?(1 or 0)");
+	scanf("%d",&ch); 
+   }
+  printf("END\n");   
+}
+
+
